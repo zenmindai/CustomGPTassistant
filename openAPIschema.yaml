@@ -1,0 +1,410 @@
+openapi: 3.0.0
+info:
+  title: Gmail and Google Calendar Integration
+  version: 1.0.0
+servers:
+  - url: 'https://www.googleapis.com'
+paths:
+  # Endpoint to get an email's details, including body text
+  /gmail/v1/users/me/messages/{id}:
+    get:
+      summary: Get an email's details, including body text
+      operationId: getEmailDetails
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [minimal, full, raw, metadata]
+      responses:
+        '200':
+          description: Email details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailDetails'
+
+  # Endpoint to search for text within emails
+  /gmail/v1/users/me/messages:
+    get:
+      summary: Search for emails containing specific text
+      operationId: searchEmails
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of emails matching the query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailList'
+
+  # Endpoint to list labels
+  /gmail/v1/users/me/labels:
+    get:
+      summary: List all labels
+      operationId: listLabels
+      responses:
+        '200':
+          description: List of labels
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelList'
+
+  # Endpoint to get emails by label
+  /gmail/v1/users/me/messages:
+    get:
+      summary: List emails by search query and label
+      operationId: listEmails
+      parameters:
+        - name: maxResults
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: labelIds
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: includeSpamTrash
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: List of emails under the specified label
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailList'
+
+  # Add your Google Calendar API endpoints here as previously defined
+
+  /calendar/v3/calendars/{calendarId}/events:
+    post:
+      summary: Creates an event.
+      operationId: insertEvent
+      tags:
+        - Events
+      parameters:
+        - name: calendarId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Calendar identifier. 
+            -Use "primary" for the primary calendar.
+        - name: conferenceDataVersion
+          in: query
+          schema:
+            type: integer
+          description: Version number of conference data supported by the API client.
+        - name: maxAttendees
+          in: query
+          schema:
+            type: integer
+          description: The maximum number of attendees to include in the response.
+        - name: sendUpdates
+          in: query
+          schema:
+            type: string
+          description: Whether to send notifications about the creation of the new event.
+        - name: supportsAttachments
+          in: query
+          schema:
+            type: boolean
+          description: Whether API client performing operation supports event attachments.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventResource'
+      responses:
+        '200':
+          description: Successfully created event.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResource'
+      security:
+        - oauth2:
+            - https://www.googleapis.com/auth/calendar
+            - https://www.googleapis.com/auth/calendar.events
+
+#CALENDAR_LIST
+  /calendar/v3/users/me/calendarList:
+    get:
+      summary: Returns the calendars on the user's calendar list.
+      operationId: listCalendarList
+      parameters:
+        - name: maxResults
+          in: query
+          description: Maximum number of entries returned on one result page. The default is 100 entries. The page size can never be larger than 250 entries.
+          required: false
+          schema:
+            type: integer
+        - name: minAccessRole
+          in: query
+          description: The minimum access role for the user in the returned entries. The default is no restriction.
+          required: false
+          schema:
+            type: string
+            enum:
+              - freeBusyReader
+              - owner
+              - reader
+              - writer
+        - name: pageToken
+          in: query
+          description: Token specifying which result page to return.
+          required: false
+          schema:
+            type: string
+        - name: showDeleted
+          in: query
+          description: Whether to include deleted calendar list entries in the result. The default is False.
+          required: false
+          schema:
+            type: boolean
+        - name: showHidden
+          in: query
+          description: Whether to show hidden entries. The default is False.
+          required: false
+          schema:
+            type: boolean
+        - name: syncToken
+          in: query
+          description: Token obtained from the nextSyncToken field returned on the last page of results from the previous list request.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of calendar entries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarListResponse'
+
+
+
+components:
+  schemas:
+    # Define EmailDetails with nested objects, EmailList, LabelList
+
+    EmailDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique ID of the email
+        threadId:
+          type: string
+          description: The ID of the thread the email belongs to
+        labelIds:
+          type: array
+          items:
+            type: string
+          description: List of label IDs attached to the email
+        snippet:
+          type: string
+          description: A brief snippet of the email content
+        historyId:
+          type: string
+          description: The ID of the last history record that modified this message
+        internalDate:
+          type: string
+          description: int64 format. The internal message creation timestamp (epoch ms), which determines ordering in the inbox.
+        payload:
+          description: MessagePart. The parsed email structure in the message parts
+          #ref: '#/components/schemas/MessagePartBody'  
+        sizeEstimate:
+          type: integer
+          description: Estimated size in bytes of the message.
+        raw:
+          type: string
+          description: The entire email message in an RFC 2822 formatted and base64url encoded string. Returned in messages.get and drafts.get responses when the format=RAW parameter is supplied.
+
+
+    MessagePart:
+       type: object
+
+       properties:
+         partId:
+           type: string
+         mimeType:
+           type: string
+         filename: 
+           type: string
+         body:
+           #ref: '#/components/schemas/MessagePartBody'
+         parts:
+           type: array
+           items:
+             #ref: '#/components/schemas/MessagePart'  
+         
+
+    MessagePart:
+      type: object       
+      properties:
+        partId:
+          type: string
+        mimeType:
+          type: string
+        filename:
+          type: string
+        headers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Header'
+
+    Header:
+      type: object
+      description: List of headers on this message part. For the top-level message part, representing the entire message payload, it will contain the standard RFC 2822 email headers such as To, From, and Subject.
+      properties: 
+        name:
+          type: string
+          description: The name of the header, e.g., `Subject`, `From`, `To`.
+        value:
+          type: string
+          description: The value of the header.
+ 
+    MessagePartBody:
+     type: object
+     properties:
+       attachmentId:
+         type: string
+       size:
+         type: integer
+       data:
+         type: string
+         description: A base64-encoded string.
+ 
+#EmailList and LabelList that define arrays of emails or labels
+    EmailList:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmailDetails'
+    LabelList:
+      type: object
+      properties:
+        labels:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+
+# Define other schemas for Calendar events as previously mentioned
+
+    EventResource:
+      type: object
+      required:
+        - start
+        - end
+      properties:
+        summary:
+          type: string
+        description:
+          type: string
+        location:
+          type: string
+        start:
+          $ref: '#/components/schemas/EventDateTime'
+        end:
+          $ref: '#/components/schemas/EventDateTime'
+        attendees:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventAttendee'
+        conferenceData:
+          $ref: '#/components/schemas/ConferenceData'
+        # Define other optional properties here as per the provided documentation.
+
+    EventDateTime:
+      type: object
+      properties:
+        dateTime:
+          type: string
+          format: date-time
+        date:
+          type: string
+          format: date
+        timeZone:
+          type: string
+    EventAttendee:
+      type: object
+      properties:
+        email:
+          type: string
+        responseStatus:
+          type: string
+    ConferenceData:
+      type: object
+      properties:
+        createRequest:
+          type: object
+          properties:
+            requestId:
+              type: string
+        # Add further nested properties for ConferenceData as required.
+
+
+    CalendarListResource:
+      type: object
+      properties:
+        kind:
+          type: string
+        etag:
+          type: string
+        id:
+          type: string
+        summary:
+          type: string
+        description:
+          type: string
+
+    CalendarListResponse:
+      type: object
+      properties:
+        kind:
+          type: string
+        etag:
+          type: string
+        nextPageToken:
+          type: string
+        nextSyncToken:
+          type: string
+
+# Add security schemes for OAuth 2.0 if needed
+security:
+  - OAuth2:
+      - https://www.googleapis.com/auth/gmail.readonly
+      - https://www.googleapis.com/auth/gmail.labels
+      - https://www.googleapis.com/auth/calendar
