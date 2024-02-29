@@ -28,4 +28,5 @@ Project to build a custom GPT for assisting users for emails, calendar, and task
 
 
 # Resources
-- Setup OAuth 2.0 to Access Google APIs https://developers.google.com/identity/protocols/oauth2- 
+- Setup OAuth 2.0 to Access Google APIs https://developers.google.com/identity/protocols/oauth2-
+- Visual Guide to setup OAuth 2.0 for Google APIs, courtesy of Postman: https://blog.postman.com/how-to-access-google-apis-using-oauth-in-postman/
