@@ -1,0 +1,63 @@
+openapi: 3.0.0
+info:
+  title: Google Sheets API
+  version: 1.0.0
+servers:
+  - url: 'https://sheets.googleapis.com/v4'
+paths:
+  # Endpoint to get an email's details, including body text
+  https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/values:batchClear:
+    post:
+      summary: Clears one or more ranges of values from a spreadsheet
+      operationId: spreadsheets.values.batchClear
+      tags:
+        - Spreadsheets
+        - Sheets
+      parameters:
+        - name: spreadsheedId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the spreadsheet. For Cerebral Valley, use ID 1781893986
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ranges:
+                  type: array
+                  items:
+                    type: string
+                  description: The ranges to clear, in A1 notation or R1C1 notation.  
+      responses:
+        '200':
+          description: Successfully cleared the specified ranges.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  spreadsheetId:
+                    type: string
+                    description: The spreadsheet the updates were applied to.
+                  clearedRanges:
+                    type: array
+                    items:
+                      type: string
+                    description: The ranges that were cleared, in A1 notation.
+
+
+
+
+components:
+  schemas:
+    # Define EmailDetails with nested objects, EmailList, LabelList
+
+   
+# Add security schemes for OAuth 2.0 if needed
+security:
+  - OAuth2:
+      - https://www.googleapis.com/auth/sheets
