@@ -97,8 +97,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EmailList'
 
-  # Add your Google Calendar API endpoints here as previously defined
-
+  # Endpoint for Calendar API endpoints
   /calendar/v3/calendars/{calendarId}/events:
     post:
       summary: Creates an event.
@@ -151,7 +150,7 @@ paths:
             - https://www.googleapis.com/auth/calendar
             - https://www.googleapis.com/auth/calendar.events
 
-#CALENDAR_LIST
+  #CALENDAR_LIST
   /calendar/v3/users/me/calendarList:
     get:
       summary: Returns the calendars on the user's calendar list.
